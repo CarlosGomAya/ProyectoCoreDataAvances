@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Documentos del cliente</h1>
+            <p class="app-subtitle"><%= cliente.nombrerazonsocial %></p>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <a href="/clientes/editar?id=<%= cliente.idcliente %>" class="btn secondary">Ver datos</a>
+            <a href="/clientes/lista" class="btn secondary">Volver a la lista</a>
+        </div>
+    </div>
+
+    <section class="panel">
+        <% if (documentos.length === 0) { %>
+            <p style="color: var(--muted);">No hay documentos cargados para este cliente.</p>
+        <% } else { %>
+            <table class="striped responsive-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tipo de documento</th>
+                        <th>Nombre del archivo</th>
+                        <th>Estado validación</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% documentos.forEach(function(doc) { %>
+                    <tr>
+                        <td><%= doc.iddocumentocliente %></td>
+                        <td><%= doc.tipodocumento %></td>
+                        <td><%= doc.nombrearchivo %></td>
+                        <td>
+                            <span id="estado-<%= doc.iddocumentocliente %>" class="badge-soft">
+                                <%= doc.estadovalidacion || 'Pendiente' %>
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-small btn-validar" data-id="<%= doc.iddocumentocliente %>" data-estado="Validado">Validar</button>
+                            &nbsp;
+                            <button class="btn-small btn-validar" style="background:var(--rojo)" data-id="<%= doc.iddocumentocliente %>" data-estado="Rechazado">Rechazar</button>
+                        </td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+            </table>
+        <% } %>
+    </section>
+</main>
+
+<script>
+    document.querySelectorAll('.btn-validar').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            validarDoc(this.getAttribute('data-id'), this.getAttribute('data-estado'));
+        });
+    });
+
+    async function validarDoc(idDocumento, estado) {
+        try {
+            const resp = await fetch('/clientes/validar-documento', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idDocumento, estado })
+            });
+
+            const result = await resp.json();
+
+            if (result.exito) {
+                document.getElementById('estado-' + idDocumento).textContent = estado;
+            } else {
+                alert('Error: ' + result.error);
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+</script>
+</body>
+</html>
