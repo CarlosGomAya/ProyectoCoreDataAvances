@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Alertas</h1>
+            <p class="app-subtitle">Bandeja del oficial de cumplimiento para priorizar, revisar y documentar alertas PLD.</p>
+        </div>
+        <a href="/reportes/lista" class="btn secondary">Ver reportes</a>
+    </div>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+        <div class="feedback"><%= mensaje %></div>
+    <% } %>
+
+    <!-- Pestanas de estado -->
+    <div class="tabs-lite" style="margin-bottom:14px;">
+        <button class="tab-lite active" id="tab-Pendiente"    onclick="filtrarAlertas('Pendiente')">Pendientes</button>
+        <button class="tab-lite"        id="tab-En revision"  onclick="filtrarAlertas('En revision')">En revisión</button>
+        <button class="tab-lite"        id="tab-Resuelta"     onclick="filtrarAlertas('Resuelta')">Resueltas</button>
+        <button class="tab-lite"        id="tab-todos"        onclick="filtrarAlertas('todos')">Historial</button>
+    </div>
+
+    <section class="panel">
+        <table class="striped responsive-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Operacion</th>
+                    <th>Regla disparada</th>
+                    <th>Nivel</th>
+                    <th>Fecha</th>
+                    <th>Responsable</th>
+                    <th>Estatus</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="alertasBody">
+                <tr>
+                    <td colspan="9">Cargando alertas...</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script src="/js/db-ajax.js"></script>
+<script>
+    var todasLasAlertas = [];
+
+    function filtrarAlertas(estatus) {
+        document.querySelectorAll('.tab-lite').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        var tabEl = document.getElementById('tab-' + estatus);
+        if (tabEl) tabEl.classList.add('active');
+
+        var lista = estatus === 'todos'
+            ? todasLasAlertas
+            : todasLasAlertas.filter(function(a) { return a.estatus === estatus; });
+
+        renderAlertas(lista);
+    }
+
+    window.addEventListener('load', async function() {
+        await cargarAlertasConTabs('Pendiente');
+    });
+</script>
+</body>
+</html>

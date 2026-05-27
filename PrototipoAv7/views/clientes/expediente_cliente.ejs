@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+    <style>
+        .wizard-steps {
+            display: flex;
+            gap: 0;
+            margin-bottom: 28px;
+            border: 1px solid var(--borde);
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .wizard-step {
+            flex: 1;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-right: 1px solid var(--borde);
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .wizard-step:last-child {
+            border-right: none;
+        }
+
+        .wizard-step.active {
+            background: var(--azul-claro);
+            color: var(--azul-oscuro);
+            font-weight: 600;
+        }
+
+        .wizard-step.done {
+            background: #edf9f3;
+            color: var(--verde);
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--borde);
+            color: var(--muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .wizard-step.active .step-num {
+            background: var(--azul-principal);
+            color: white;
+        }
+
+        .wizard-step.done .step-num {
+            background: var(--verde);
+            color: white;
+        }
+
+        .riesgo-badge {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 999px;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .file-field-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--borde);
+        }
+
+        .file-field-row:last-child {
+            border-bottom: none;
+        }
+
+        .file-field-label {
+            flex: 1;
+            font-size: 14px;
+            color: var(--texto);
+            font-weight: 600;
+        }
+
+        .file-field-label span {
+            display: block;
+            font-weight: 400;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .file-field-row input[type="file"] {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .resumen-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .resumen-item {
+            background: #f8fbff;
+            border: 1px solid var(--borde);
+            border-radius: 6px;
+            padding: 10px 14px;
+        }
+
+        .resumen-item span {
+            display: block;
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 4px;
+        }
+
+        .resumen-item strong {
+            font-size: 14px;
+            color: var(--texto);
+        }
+    </style>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Nuevo expediente de cliente</h1>
+            <p class="app-subtitle">Complete los tres pasos para registrar al cliente en el sistema.</p>
+        </div>
+        <a href="/clientes/lista" class="btn secondary">Volver a la lista</a>
+    </div>
+
+    <!-- Indicador de pasos -->
+    <div class="wizard-steps" id="wizardSteps">
+        <div class="wizard-step active" id="stepTab1">
+            <div class="step-num">1</div>
+            <div>
+                <div>Datos generales</div>
+            </div>
+        </div>
+        <div class="wizard-step" id="stepTab2">
+            <div class="step-num">2</div>
+            <div>Documentos</div>
+        </div>
+        <div class="wizard-step" id="stepTab3">
+            <div class="step-num">3</div>
+            <div>Resumen y guardar</div>
+        </div>
+    </div>
+
+    <div id="formMessage"></div>
+
+    <!-- Paso 1: Datos generales -->
+    <div id="paso1">
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Identificación del cliente</h6>
+            <div class="form-grid">
+                <div>
+                    <label for="nombre">Nombre / Razón Social <span style="color:var(--rojo)">*</span></label>
+                    <input type="text" id="nombre" placeholder="Ej. Juan Garcia Lopez" required>
+                </div>
+                <div>
+                    <label for="rfc">RFC <span style="color:var(--rojo)">*</span></label>
+                    <input type="text" id="rfc" placeholder="Ej. GALJ850312AB1" maxlength="13" required>
+                </div>
+                <div>
+                    <label for="curp">CURP</label>
+                    <input type="text" id="curp" placeholder="Ej. GALJ850312HDFRCN01" maxlength="18">
+                </div>
+                <div>
+                    <label for="tipoCliente">Tipo de cliente</label>
+                    <select id="tipoCliente">
+                        <option value="FISICA">Persona Física</option>
+                        <option value="MORAL">Persona Moral</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="estatusCliente">Estatus</label>
+                    <select id="estatusCliente">
+                        <option value="ACTIVO">Activo</option>
+                        <option value="INACTIVO">Inactivo</option>
+                        <option value="BLOQUEADO">Bloqueado</option>
+                        <option value="BAJA">Baja</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Contacto</h6>
+            <div class="form-grid">
+                <div>
+                    <label for="contactoPrincipal">Contacto principal</label>
+                    <input type="text" id="contactoPrincipal" placeholder="Nombre del contacto">
+                </div>
+                <div>
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" placeholder="Ej. 5512345678">
+                </div>
+                <div>
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" placeholder="correo@ejemplo.com">
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Domicilio</h6>
+            <div class="form-grid">
+                <div>
+                    <label for="calle">Calle y número</label>
+                    <input type="text" id="calle" placeholder="Ej. Av. Insurgentes 123">
+                </div>
+                <div>
+                    <label for="colonia">Colonia</label>
+                    <input type="text" id="colonia" placeholder="Ej. Del Valle">
+                </div>
+                <div>
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" id="ciudad" placeholder="Ej. Ciudad de México">
+                </div>
+                <div>
+                    <label for="estado">Estado</label>
+                    <input type="text" id="estado" placeholder="Ej. CDMX">
+                </div>
+                <div>
+                    <label for="codigoPostal">Código postal</label>
+                    <input type="text" id="codigoPostal" placeholder="Ej. 03100" maxlength="5">
+                </div>
+            </div>
+        </section>
+
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Perfil de riesgo PLD</h6>
+            <div class="form-grid">
+                <div>
+                    <label for="limiteOperativo">Límite operativo autorizado (MXN)</label>
+                    <input type="number" id="limiteOperativo" min="0" step="1000" placeholder="0">
+                </div>
+                <div style="display:flex;align-items:center;gap:12px;padding-top:28px">
+                    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-weight:400;margin:0">
+                        <input type="checkbox" id="esPEP" style="width:18px;height:18px">
+                        <span>Persona Expuesta Politicamente (PEP)</span>
+                    </label>
+                </div>
+                <div>
+                    <label>Nivel de riesgo calculado</label>
+                    <div class="readonly-field" style="gap:10px">
+                        <span id="nivelRiesgo" class="riesgo-badge badge-soft badge-ok">BAJO</span>
+                        <span style="font-size:12px;color:var(--muted)">Se calcula automáticamente</span>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top:16px">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" placeholder="Notas adicionales sobre el cliente..." style="width:100%;min-height:80px;border:1px solid var(--borde);border-radius:6px;padding:10px 12px;font-size:14px;resize:vertical"></textarea>
+            </div>
+        </section>
+
+        <div class="form-actions">
+            <button type="button" class="btn" onclick="irPaso2()">Siguiente: Documentos &rarr;</button>
+        </div>
+    </div>
+
+
+    <!-- Paso 2: Documentos -->
+    <div id="paso2" style="display:none">
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 4px">Carga de documentos</h6>
+            <p style="color:var(--muted);font-size:13px;margin:0 0 18px">Los documentos son opcionales en este paso. Puedes cargarlos después desde el expediente del cliente.</p>
+
+            <div class="file-field-row">
+                <div class="file-field-label">
+                    INE o Pasaporte
+                    <span>Identificación oficial vigente</span>
+                </div>
+                <input type="file" id="ine" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="file-field-row">
+                <div class="file-field-label">
+                    Comprobante de domicilio
+                    <span>No mayor a 3 meses de emision</span>
+                </div>
+                <input type="file" id="compDomicilio" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="file-field-row">
+                <div class="file-field-label">
+                    Documento RFC
+                    <span>Cédula de identificación fiscal</span>
+                </div>
+                <input type="file" id="docRfc" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="file-field-row">
+                <div class="file-field-label">
+                    Documento CURP
+                    <span>Solo para personas físicas</span>
+                </div>
+                <input type="file" id="docCurp" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+            <div class="file-field-row">
+                <div class="file-field-label">
+                    Constancia de situación fiscal
+                    <span>Emitida por el SAT</span>
+                </div>
+                <input type="file" id="constancia" accept=".pdf,.jpg,.jpeg,.png">
+            </div>
+        </section>
+
+        <div class="form-actions">
+            <button type="button" class="btn secondary" onclick="irPaso1()">&larr; Anterior</button>
+            <button type="button" class="btn" onclick="irPaso3()">Siguiente: Resumen &rarr;</button>
+        </div>
+    </div>
+
+
+    <!-- Paso 3: Resumen -->
+    <div id="paso3" style="display:none">
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Resumen del expediente</h6>
+            <div id="resumen" class="resumen-grid"></div>
+        </section>
+
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 12px">Documentos a cargar</h6>
+            <div id="resumenDocs" style="color:var(--muted);font-size:14px"></div>
+        </section>
+
+        <div class="form-actions">
+            <button type="button" class="btn secondary" onclick="irPaso2()">&larr; Anterior</button>
+            <button type="button" class="btn" id="btnGuardar" onclick="guardarExpediente()">Guardar expediente</button>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    document.getElementById('esPEP').addEventListener('change', calcularRiesgo);
+    document.getElementById('limiteOperativo').addEventListener('input', calcularRiesgo);
+
+    function calcularRiesgo() {
+        const esPEP  = document.getElementById('esPEP').checked;
+        const limite = parseFloat(document.getElementById('limiteOperativo').value) || 0;
+        const badge  = document.getElementById('nivelRiesgo');
+        let nivel    = 'BAJO';
+
+        if (esPEP) {
+            nivel = 'ALTO';
+        } else if (limite >= 1500000) {
+            nivel = 'MEDIO';
+        }
+
+        badge.textContent = nivel;
+        badge.className   = 'riesgo-badge badge-soft ' + (nivel === 'ALTO' ? 'badge-danger' : nivel === 'MEDIO' ? 'badge-warn' : 'badge-ok');
+    }
+
+    function setStepActive(n) {
+        [1, 2, 3].forEach(function(i) {
+            const tab = document.getElementById('stepTab' + i);
+            tab.classList.remove('active', 'done');
+            if (i < n) tab.classList.add('done');
+            if (i === n) tab.classList.add('active');
+        });
+    }
+
+    function irPaso1() {
+        document.getElementById('paso1').style.display = 'block';
+        document.getElementById('paso2').style.display = 'none';
+        document.getElementById('paso3').style.display = 'none';
+        setStepActive(1);
+        window.scrollTo(0, 0);
+    }
+
+    function irPaso2() {
+        const nombre = document.getElementById('nombre').value.trim();
+        const rfc    = document.getElementById('rfc').value.trim();
+
+        if (!nombre || !rfc) {
+            document.getElementById('formMessage').innerHTML = '<div class="feedback error">Nombre y RFC son obligatorios para continuar.</div>';
+            document.getElementById('nombre').focus();
+            return;
+        }
+
+        document.getElementById('formMessage').innerHTML = '';
+        document.getElementById('paso1').style.display = 'none';
+        document.getElementById('paso2').style.display = 'block';
+        document.getElementById('paso3').style.display = 'none';
+        setStepActive(2);
+        window.scrollTo(0, 0);
+    }
+
+    function irPaso3() {
+        const nivel = document.getElementById('nivelRiesgo').textContent;
+
+        const campos = [
+            { id: 'nombre',           label: 'Nombre / Razón Social' },
+            { id: 'rfc',              label: 'RFC' },
+            { id: 'curp',             label: 'CURP' },
+            { id: 'tipoCliente',      label: 'Tipo de cliente' },
+            { id: 'estatusCliente',   label: 'Estatus' },
+            { id: 'contactoPrincipal',label: 'Contacto principal' },
+            { id: 'telefono',         label: 'Teléfono' },
+            { id: 'correo',           label: 'Correo' },
+            { id: 'calle',            label: 'Calle y número' },
+            { id: 'colonia',          label: 'Colonia' },
+            { id: 'ciudad',           label: 'Ciudad' },
+            { id: 'estado',           label: 'Estado' },
+            { id: 'codigoPostal',     label: 'Código postal' },
+            { id: 'limiteOperativo',  label: 'Límite operativo (MXN)' }
+        ];
+
+        document.getElementById('resumen').innerHTML = campos.map(function(c) {
+            const val = document.getElementById(c.id).value.trim() || '-';
+            return '<div class="resumen-item"><span>' + c.label + '</span><strong>' + val + '</strong></div>';
+        }).join('') + '<div class="resumen-item"><span>Es PEP</span><strong>' + (document.getElementById('esPEP').checked ? 'Si' : 'No') + '</strong></div>' +
+          '<div class="resumen-item"><span>Nivel de riesgo</span><strong>' + nivel + '</strong></div>';
+
+        const archivosLabel = [
+            { id: 'ine',           nombre: 'INE / Pasaporte' },
+            { id: 'compDomicilio', nombre: 'Comprobante de domicilio' },
+            { id: 'docRfc',        nombre: 'Documento RFC' },
+            { id: 'docCurp',       nombre: 'Documento CURP' },
+            { id: 'constancia',    nombre: 'Constancia situación fiscal' }
+        ];
+
+        const docsCargados = archivosLabel.filter(function(a) {
+            return document.getElementById(a.id).files[0];
+        });
+
+        document.getElementById('resumenDocs').innerHTML = docsCargados.length > 0
+            ? docsCargados.map(function(a) { return '<span class="badge-soft badge-ok" style="margin:4px">' + a.nombre + '</span>'; }).join('')
+            : '<span style="color:var(--muted)">No se seleccionaron documentos. Podrán cargarse después.</span>';
+
+        document.getElementById('paso1').style.display = 'none';
+        document.getElementById('paso2').style.display = 'none';
+        document.getElementById('paso3').style.display = 'block';
+        setStepActive(3);
+        window.scrollTo(0, 0);
+    }
+
+    async function guardarExpediente() {
+        const btn = document.getElementById('btnGuardar');
+        btn.disabled    = true;
+        btn.textContent = 'Guardando...';
+
+        const formData = new FormData();
+        formData.append('nombre',            document.getElementById('nombre').value);
+        formData.append('rfc',               document.getElementById('rfc').value);
+        formData.append('curp',              document.getElementById('curp').value);
+        formData.append('tipoCliente',       document.getElementById('tipoCliente').value);
+        formData.append('estatusCliente',    document.getElementById('estatusCliente').value);
+        formData.append('contactoPrincipal', document.getElementById('contactoPrincipal').value);
+        formData.append('telefono',          document.getElementById('telefono').value);
+        formData.append('correo',            document.getElementById('correo').value);
+        formData.append('calle',             document.getElementById('calle').value);
+        formData.append('colonia',           document.getElementById('colonia').value);
+        formData.append('ciudad',            document.getElementById('ciudad').value);
+        formData.append('estado',            document.getElementById('estado').value);
+        formData.append('codigoPostal',      document.getElementById('codigoPostal').value);
+        formData.append('limiteOperativo',   document.getElementById('limiteOperativo').value);
+        formData.append('esPEP',             document.getElementById('esPEP').checked ? 'Si' : 'No');
+        formData.append('nivelRiesgo',       document.getElementById('nivelRiesgo').textContent);
+        formData.append('observaciones',     document.getElementById('observaciones').value);
+
+        const archivos = [
+            { id: 'ine',           nombre: 'INE' },
+            { id: 'compDomicilio', nombre: 'Domicilio' },
+            { id: 'docRfc',        nombre: 'RFC' },
+            { id: 'docCurp',       nombre: 'CURP' },
+            { id: 'constancia',    nombre: 'ConstanciaFiscal' }
+        ];
+
+        archivos.forEach(function(a) {
+            const input = document.getElementById(a.id);
+            if (input.files[0]) formData.append(a.nombre, input.files[0]);
+        });
+
+        try {
+            const resp   = await fetch('/clientes/expediente', { method: 'POST', body: formData });
+            const result = await resp.json();
+
+            if (result.exito) {
+                window.location.href = '/clientes/lista?mensaje=Cliente registrado correctamente. ID: ' + result.idCliente;
+            } else {
+                document.getElementById('formMessage').innerHTML = '<div class="feedback error">Error: ' + result.error + '</div>';
+                btn.disabled    = false;
+                btn.textContent = 'Guardar expediente';
+            }
+        } catch (err) {
+            document.getElementById('formMessage').innerHTML = '<div class="feedback error">Error de conexión: ' + err.message + '</div>';
+            btn.disabled    = false;
+            btn.textContent = 'Guardar expediente';
+        }
+    }
+</script>
+</body>
+</html>
