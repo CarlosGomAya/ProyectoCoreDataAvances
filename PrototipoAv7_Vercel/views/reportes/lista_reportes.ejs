@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Reportes</h1>
+            <p class="app-subtitle">Seguimiento de reportes regulatorios y cumplimiento PLD.</p>
+        </div>
+    </div>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+        <div class="feedback"><%= mensaje %></div>
+    <% } %>
+
+    <section class="panel">
+        <table class="striped responsive-table">
+            <thead>
+                <tr>
+                    <th>Clave</th>
+                    <th>Nombre</th>
+                    <th>Periodo</th>
+                    <th>Canal</th>
+                    <th>Estatus</th>
+                </tr>
+            </thead>
+            <tbody id="reportesBody">
+                <tr>
+                    <td colspan="5">Cargando reportes...</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script src="/js/db-ajax.js"></script>
+<script>
+    window.addEventListener('load', function() {
+        cargarReportes();
+    });
+</script>
+</body>
+</html>

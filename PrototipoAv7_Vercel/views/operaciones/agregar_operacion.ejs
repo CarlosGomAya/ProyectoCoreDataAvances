@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+    <style>
+        .monto-preview {
+            background: var(--azul-claro);
+            border: 1px solid var(--borde);
+            border-radius: 6px;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+
+        .monto-preview span {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .monto-preview strong {
+            font-size: 22px;
+            color: var(--azul-oscuro);
+            font-weight: 700;
+        }
+
+        .alerta-monto {
+            border-left: 4px solid var(--amarillo);
+            background: #fff7e6;
+            color: #7a5c00;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 10px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Registrar operación</h1>
+            <p class="app-subtitle">Captura los datos de la operación. Se enviará a validación automáticamente.</p>
+        </div>
+        <a href="/operaciones/lista" class="btn secondary">Volver a la lista</a>
+    </div>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+        <div class="feedback error"><%= mensaje %></div>
+    <% } %>
+
+    <form action="/operaciones/agregar" method="POST">
+        <section class="panel" style="margin-bottom:16px">
+            <h6 style="color:var(--azul-oscuro);font-weight:700;margin:0 0 16px">Datos de la operación</h6>
+            <div class="form-grid">
+
+                <div>
+                    <label for="idcliente">Cliente <span style="color:var(--rojo)">*</span></label>
+                    <select name="idcliente" id="idcliente" required>
+                        <option value="">-- Seleccionar cliente --</option>
+                        <% (locals.clientes || []).forEach(function(c) { %>
+                            <option value="<%= c.id_cliente %>"><%= c.nombre_razon_social %> &mdash; <%= c.rfc %></option>
+                        <% }); %>
+                    </select>
+                    <% if ((locals.clientes || []).length === 0) { %>
+                        <p style="color:var(--muted);font-size:12px;margin-top:6px">No hay clientes registrados. <a href="/clientes/expediente">Agregar cliente</a>.</p>
+                    <% } %>
+                </div>
+
+                <div>
+                    <label for="tipooperacion">Tipo de operación <span style="color:var(--rojo)">*</span></label>
+                    <select name="tipooperacion" id="tipooperacion" required>
+                        <option value="">-- Seleccionar tipo --</option>
+                        <option value="Deposito">Depósito</option>
+                        <option value="Retiro">Retiro</option>
+                        <option value="Disposicion">Disposición de crédito</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Transferencia">Transferencia</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="producto">Producto</label>
+                    <select name="producto" id="producto">
+                        <option value="Credito simple">Crédito simple</option>
+                        <option value="Credito revolvente">Crédito revolvente</option>
+                        <option value="Arrendamiento">Arrendamiento</option>
+                        <option value="Factoraje">Factoraje</option>
+                        <option value="General">General</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="moneda">Moneda</label>
+                    <select name="moneda" id="moneda">
+                        <option value="MXN">MXN — Peso mexicano</option>
+                        <option value="USD">USD — Dólar americano</option>
+                        <option value="EUR">EUR — Euro</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="monto">Monto <span style="color:var(--rojo)">*</span></label>
+                    <input type="number" name="monto" id="monto" min="1" step="0.01" placeholder="0.00" required>
+                </div>
+
+                <div>
+                    <label for="fecha">Fecha de operación <span style="color:var(--rojo)">*</span></label>
+                    <input type="date" name="fecha" id="fecha" required>
+                </div>
+
+            </div>
+
+            <div class="monto-preview">
+                <span>Monto a registrar</span>
+                <strong id="montoDisplay">$0.00 MXN</strong>
+            </div>
+
+            <div class="alerta-monto" id="alertaMonto">
+                Operación superior a $600,000 MXN — podría generar una alerta PLD automáticamente al guardar.
+            </div>
+        </section>
+
+        <div class="form-actions">
+            <button type="submit" class="btn">Registrar operación</button>
+            <a href="/operaciones/lista" class="btn secondary">Cancelar</a>
+        </div>
+    </form>
+</main>
+
+<script>
+    const montoInput  = document.getElementById('monto');
+    const monedaInput = document.getElementById('moneda');
+    const display     = document.getElementById('montoDisplay');
+    const alerta      = document.getElementById('alertaMonto');
+
+    function actualizarMonto() {
+        const valor  = parseFloat(montoInput.value) || 0;
+        const moneda = monedaInput.value || 'MXN';
+        display.textContent = '$' + valor.toLocaleString('es-MX', { minimumFractionDigits: 2 }) + ' ' + moneda;
+        alerta.style.display = (moneda === 'MXN' && valor >= 600000) ? 'block' : 'none';
+    }
+
+    montoInput.addEventListener('input', actualizarMonto);
+    monedaInput.addEventListener('change', actualizarMonto);
+
+    // Fecha de hoy por defecto
+    document.getElementById('fecha').valueAsDate = new Date();
+</script>
+</body>
+</html>

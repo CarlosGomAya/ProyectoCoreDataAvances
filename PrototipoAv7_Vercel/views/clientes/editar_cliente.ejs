@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Editar cliente</h1>
+            <p class="app-subtitle">Actualiza los datos del expediente del cliente.</p>
+        </div>
+        <a href="/clientes/lista" class="btn secondary">Volver a la lista</a>
+    </div>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+        <div class="feedback <%= mensaje.toLowerCase().includes('error') ? 'error' : '' %>"><%= mensaje %></div>
+    <% } %>
+
+    <section class="panel">
+        <form action="/clientes/editar" method="POST">
+
+            <input type="hidden" name="idCliente" value="<%= cliente.id_cliente %>">
+
+            <div class="form-grid">
+                <div>
+                    <label for="nombre">Nombre / Razón social</label>
+                    <input type="text" name="nombre" id="nombre" value="<%= cliente.nombre_razon_social %>" required>
+                </div>
+
+                <div>
+                    <label for="rfc">RFC</label>
+                    <input type="text" name="rfc" id="rfc" value="<%= cliente.rfc || '' %>">
+                </div>
+
+                <div>
+                    <label for="curp">CURP</label>
+                    <input type="text" name="curp" id="curp" value="<%= cliente.curp || '' %>">
+                </div>
+
+                <div>
+                    <label for="tipoPersona">Tipo de persona</label>
+                    <select name="tipoPersona" id="tipoPersona">
+                        <option value="FISICA" <%= cliente.tipo_persona === 'FISICA' ? 'selected' : '' %>>Física</option>
+                        <option value="MORAL"  <%= cliente.tipo_persona === 'MORAL'  ? 'selected' : '' %>>Moral</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="correo">Correo</label>
+                    <input type="email" name="correo" id="correo" value="<%= cliente.correo || '' %>">
+                </div>
+
+                <div>
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" name="telefono" id="telefono" value="<%= cliente.telefono || '' %>">
+                </div>
+
+                <div>
+                    <label for="nacionalidad">Nacionalidad</label>
+                    <input type="text" name="nacionalidad" id="nacionalidad" value="<%= cliente.nacionalidad || '' %>">
+                </div>
+
+                <div>
+                    <label for="esPep">PEP</label>
+                    <select name="esPep" id="esPep">
+                        <option value=""   <%= !cliente.es_pep ? 'selected' : '' %>>No</option>
+                        <option value="Si" <%= cliente.es_pep  ? 'selected' : '' %>>Si</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="nivelRiesgo">Riesgo</label>
+                    <select name="nivelRiesgo" id="nivelRiesgo">
+                        <option value="BAJO"     <%= cliente.nivel_riesgo === 'BAJO'     ? 'selected' : '' %>>Bajo</option>
+                        <option value="MEDIO"    <%= cliente.nivel_riesgo === 'MEDIO'    ? 'selected' : '' %>>Medio</option>
+                        <option value="ALTO"     <%= cliente.nivel_riesgo === 'ALTO'     ? 'selected' : '' %>>Alto</option>
+                        <option value="MUY_ALTO" <%= cliente.nivel_riesgo === 'MUY_ALTO' ? 'selected' : '' %>>Muy Alto</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="calle">Calle</label>
+                    <input type="text" name="calle" id="calle" value="<%= domicilio.calle || '' %>">
+                </div>
+
+                <div>
+                    <label for="colonia">Colonia</label>
+                    <input type="text" name="colonia" id="colonia" value="<%= domicilio.colonia || '' %>">
+                </div>
+
+                <div>
+                    <label for="ciudad">Ciudad</label>
+                    <input type="text" name="ciudad" id="ciudad" value="<%= domicilio.ciudad || '' %>">
+                </div>
+
+                <div>
+                    <label for="estado">Estado</label>
+                    <input type="text" name="estado" id="estado" value="<%= domicilio.estado || '' %>">
+                </div>
+
+                <div>
+                    <label for="pais">País</label>
+                    <input type="text" name="pais" id="pais" value="<%= domicilio.pais || '' %>">
+                </div>
+
+                <div>
+                    <label for="tipoDomicilio">Tipo de domicilio</label>
+                    <select name="tipoDomicilio" id="tipoDomicilio">
+                        <option value="">-- Seleccionar --</option>
+                        <option value="FISCAL"     <%= domicilio.tipo_domicilio === 'FISCAL'     ? 'selected' : '' %>>Fiscal</option>
+                        <option value="COMERCIAL"  <%= domicilio.tipo_domicilio === 'COMERCIAL'  ? 'selected' : '' %>>Comercial</option>
+                        <option value="PARTICULAR" <%= domicilio.tipo_domicilio === 'PARTICULAR' ? 'selected' : '' %>>Particular</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-top:16px">
+                <label for="observaciones">Notas de cumplimiento</label>
+                <textarea name="observaciones" id="observaciones" rows="4" style="width:100%;resize:vertical;box-sizing:border-box"><%= cliente.observaciones || '' %></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Guardar cambios</button>
+                <a href="/clientes/documentos?id=<%= cliente.id_cliente %>" class="btn secondary">Ver documentos</a>
+            </div>
+
+        </form>
+    </section>
+</main>
+</body>
+</html>

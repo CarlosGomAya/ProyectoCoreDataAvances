@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <%- include('./../css.ejs') %>
+</head>
+<body>
+<%- include('./../nav.ejs') %>
+
+<main class="app-page">
+    <div class="app-header">
+        <div>
+            <h1 class="app-title">Contratos</h1>
+            <p class="app-subtitle">Vista de consulta para relacionar clientes, productos, saldos y vigencia.</p>
+        </div>
+        <a href="/clientes/lista" class="btn secondary">Ver clientes</a>
+    </div>
+
+    <% if (typeof mensaje !== 'undefined' && mensaje) { %>
+        <div class="feedback"><%= mensaje %></div>
+    <% } %>
+
+    <section class="panel">
+        <table class="striped responsive-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Producto</th>
+                    <th>Fecha inicio</th>
+                    <th>Vencimiento</th>
+                    <th>Saldo</th>
+                    <th>Estatus</th>
+                </tr>
+            </thead>
+            <tbody id="contratosBody">
+                <tr>
+                    <td colspan="7">Cargando contratos...</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script src="/js/db-ajax.js"></script>
+<script>
+    window.addEventListener('load', function() {
+        cargarContratos();
+    });
+</script>
+</body>
+</html>
